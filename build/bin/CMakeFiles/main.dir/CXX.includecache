@@ -1,0 +1,24 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/ivan/Desktop/Projects/jparser/source/bin/main.cpp
+parser.hpp
+/home/ivan/Desktop/Projects/jparser/source/bin/parser.hpp
+
+/home/ivan/Desktop/Projects/jparser/source/parser/parser.hpp
+iostream
+-
+string
+-
+queue
+-
+map
+-
+utility
+-
+

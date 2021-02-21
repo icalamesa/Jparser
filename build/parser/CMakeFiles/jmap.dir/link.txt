@@ -1,0 +1,1 @@
+/usr/bin/c++ -fPIC   -shared -Wl,-soname,libjmap.so.0.1 -o libjmap.so.0.1 CMakeFiles/jmap.dir/parser.cpp.o 
