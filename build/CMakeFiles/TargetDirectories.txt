@@ -1,8 +1,0 @@
-/home/ivan/Desktop/Projects/jparser/build/CMakeFiles/rebuild_cache.dir
-/home/ivan/Desktop/Projects/jparser/build/CMakeFiles/edit_cache.dir
-/home/ivan/Desktop/Projects/jparser/build/bin/CMakeFiles/rebuild_cache.dir
-/home/ivan/Desktop/Projects/jparser/build/bin/CMakeFiles/main.dir
-/home/ivan/Desktop/Projects/jparser/build/bin/CMakeFiles/edit_cache.dir
-/home/ivan/Desktop/Projects/jparser/build/parser/CMakeFiles/rebuild_cache.dir
-/home/ivan/Desktop/Projects/jparser/build/parser/CMakeFiles/jmap.dir
-/home/ivan/Desktop/Projects/jparser/build/parser/CMakeFiles/edit_cache.dir
