@@ -31,7 +31,7 @@
         std::string key_aux;
         std::string value_aux;
         enum class status { EXPECT_OPEN, EXPECT_KEY, OPEN_KEY, EXPECT_COLON, EXPECT_VAL, OPEN_VAL, EXPECT_ACTION};
-
+        enum class backslashed { YES, NO };
 
         status the_status = status::EXPECT_OPEN;
         for (auto a : in)
@@ -44,7 +44,7 @@
                     the_status = status::EXPECT_KEY;
                     //stack increase
                 }
-                else //crash
+                else throw "No bracket opening added to input json!"
             }
 
             if (the_status == status::EXPECT_KEY)
@@ -63,7 +63,11 @@
                     the_status = status::EXPECT_COLON;
                     continue;
                 }
-                else key_aux.push_back(in[a]);
+                else 
+                {
+                    
+                    key_aux.push_back(in[a]);
+                }
             }
         }
     }
