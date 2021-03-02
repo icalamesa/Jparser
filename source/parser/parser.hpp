@@ -12,6 +12,7 @@ namespace jlib
 {
     class jmap
     {
+
         //actual storage
         std::map<std::string, std::string> _strings;
         std::map<std::string, int> _integers;
