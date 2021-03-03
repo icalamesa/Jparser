@@ -1,7 +1,9 @@
 //Parser.cpp
 
 #include "parser.hpp"
+#include <iostream>
 #include <utility>
+#include <exception>
 #include <fstream>
 #ifndef PARSERCPP
 #define PARSERCPP
@@ -22,20 +24,33 @@
         _doubles.insert({key, value});
     }
 
+    std::string jmap::get_str(std::string name)
+    {
+        return this->_strings.at(name);
+    }
+
     jmap::~jmap() {}
 
-    jmap::jmap(std::string name) {}
+    jmap::jmap(std::string name) 
+    {
+        std::ifstream file("../../data/test.json", std::ios_base::in);
+        std::string data_stream((std::istreambuf_iterator<char>(file)),(std::istreambuf_iterator<char>() )   );
+        parse(data_stream);
+    }
     
     void jmap::parse(std::string in) 
     {
         std::string key_aux;
         std::string value_aux;
         enum class status { EXPECT_OPEN, EXPECT_KEY, OPEN_KEY, EXPECT_COLON, EXPECT_VAL, OPEN_VAL, EXPECT_ACTION};
+
+        //still unused
         enum class backslashed { YES, NO };
 
         status the_status = status::EXPECT_OPEN;
-        for (auto a : in)
+        for (size_t a = 0; a < in.size(); a++)
         {
+            std::cout << in[a];
             if (the_status == status::EXPECT_OPEN)
             {
                 if (in[a] <= ' ') continue;
@@ -44,7 +59,7 @@
                     the_status = status::EXPECT_KEY;
                     //stack increase
                 }
-                else throw "No bracket opening added to input json!";
+                else throw std::runtime_error("No bracket opening added to input json!");
             }
             
             //if we expect to find a keyword
@@ -81,7 +96,7 @@
                     continue;
                 }
                 else if (in[a] <= ' ') continue;
-                else throw "No semicolon found bruh";
+                //else throw std::runtime_error("No semicolon found bruh");
             }
 
             if (the_status == status::EXPECT_VAL)
@@ -92,7 +107,7 @@
                     the_status = status::OPEN_VAL;
                     continue;
                 }
-                else throw "no val found";
+                else throw std::runtime_error("no val found");
             }
 
             if (the_status == status::OPEN_VAL)
@@ -102,6 +117,7 @@
                 {
                     value_aux.push_back(in[a]);
                     the_status = status::EXPECT_ACTION;
+                    add_entry(key_aux, value_aux);
                     continue;
                 }
             }
@@ -109,15 +125,18 @@
             if (the_status == status::EXPECT_ACTION)
             {
                 if (in[a] <= ' ') continue;
-                if (in[a] == '}') break;
-                else throw "no end bracket found";
+                else if (in[a] == '}') break;
+                else if (in[a] == ',') the_status = status::EXPECT_KEY;
+                else throw std::runtime_error("no end bracket found");
             }
+
         }
     }
 
     void jmap::out(std::string path, std::string filename)
     {
-        std::ofstream FILE(path+filename);
+        std::ofstream file(path+filename);
         //need
     }
+
 #endif
