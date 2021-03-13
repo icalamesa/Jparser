@@ -29,6 +29,16 @@
         return this->_strings.at(name);
     }
 
+    double jmap::get_double(std::string name)
+    {
+        return this->_doubles.at(name);
+    }
+
+    int jmap::get_int(std::string name)
+    {
+        return this->_integers.at(name);
+    }
+
     jmap::~jmap() {}
 
     jmap::jmap(std::string name) 
@@ -42,7 +52,7 @@
     {
         std::string key_aux;
         std::string value_aux;
-        enum class status { EXPECT_OPEN, EXPECT_KEY, OPEN_KEY, EXPECT_COLON, EXPECT_VAL, OPEN_VAL, EXPECT_ACTION};
+        enum class status { EXPECT_OPEN, EXPECT_KEY, OPEN_KEY, EXPECT_COLON, EXPECT_VAL, OPEN_VAL, STRING, NUMBER, BOOL, EXPECT_ACTION};
 
         //still unused
         enum class backslashed { YES, NO };
@@ -106,16 +116,14 @@
 
             else if (the_status == status::EXPECT_VAL)
             {
-                if (in[a] <= ' ') continue;
-                else if (in[a] == '\"')
-                {
-                    the_status = status::OPEN_VAL;
-                }
-                else throw std::runtime_error("no val found");
+                if (in[a] == '\"') the_status = status::STRING;
+                else if (in[a] == 'T') the_status = status::BOOL;
+                else if (not (in[a] <= ' ')) the_status = status::NUMBER;
+
                 continue;
             }
 
-            else if (the_status == status::OPEN_VAL)
+            else if (the_status == status::STRING)
             {
                 if (in[a] == '\"' and in[a-1] != '\\')
                 {
@@ -123,7 +131,22 @@
                     add_entry(key_aux, value_aux);
                 }
                 else value_aux.push_back(in[a]);
+
+
                 continue;
+            }
+
+            else if (the_status == status::NUMBER)
+            {
+                if (in[a] <= ' ')
+                {
+                    if (value_aux.find('.') == std::string::npos)
+                    {
+                        add_entry(key_aux, std::stoi(value_aux));
+                    }
+                    else add_entry(key_aux, std::stod(value_aux));
+                }
+                else value_aux.push_back(in[a]);
             }
 
             else if (the_status == status::EXPECT_ACTION)
