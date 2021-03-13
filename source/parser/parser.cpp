@@ -107,7 +107,8 @@
             {
                 if (in[a] == ':')
                 {
-                    the_status = status::EXPECT_VAL;
+                    if (in[a+1] >= '0' and in[a+1] <= '9') the_status = status::NUMBER;
+                    else the_status = status::EXPECT_VAL;
                     continue;
                 }
                 //else throw std::runtime_error("No semicolon found bruh");
@@ -118,7 +119,7 @@
             {
                 if (in[a] == '\"') the_status = status::STRING;
                 else if (in[a] == 'T') the_status = status::BOOL;
-                else if (not (in[a] <= ' ')) the_status = status::NUMBER;
+                else if (in[a+1] >= '0' and in[a+1] <= '9') the_status = status::NUMBER;
 
                 continue;
             }
@@ -138,13 +139,16 @@
 
             else if (the_status == status::NUMBER)
             {
-                if (in[a] <= ' ')
+                if (in[a+1] <= ' ' or in[a+1] == '}' or in[a+1]==',')
                 {
+                    value_aux.push_back(in[a]);
                     if (value_aux.find('.') == std::string::npos)
                     {
-                        add_entry(key_aux, std::stoi(value_aux));
+                        add_entry(key_aux, std::stoi(value_aux, nullptr));
                     }
-                    else add_entry(key_aux, std::stod(value_aux));
+                    else add_entry(key_aux, std::stod(value_aux, nullptr));
+
+                    the_status = status::EXPECT_ACTION;
                 }
                 else value_aux.push_back(in[a]);
             }
