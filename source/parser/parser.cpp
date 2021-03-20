@@ -53,11 +53,11 @@
         std::string key_aux;
         std::string value_aux;
         enum class status { EXPECT_OPEN, EXPECT_KEY, OPEN_KEY, EXPECT_COLON, EXPECT_VAL, OPEN_VAL, STRING, NUMBER, BOOL, EXPECT_ACTION};
-
-        //still unused
-        enum class backslashed { YES, NO };
-
         status the_status = status::EXPECT_OPEN;
+        
+        bool quotation_marked = 0;
+        bool backslashed = false;
+
         for (size_t a = 0; a < in.size(); a++)
         {
             if (the_status == status::EXPECT_OPEN)
@@ -66,23 +66,22 @@
                 else if (in[a] == '{') 
                 {
                     the_status = status::EXPECT_KEY;
-                    //stack increase
-                    continue;
                 }
                 else throw std::runtime_error("No bracket opening added to input json!");
             }
             
             else if (the_status == status::EXPECT_KEY)
             {
-
                 //if we expect to find a keyword
                 if (in[a] <= ' ') continue;
-                else if (in[a] <= '\"')
+                else if (in[a] == '\"') quotation_marked = true;
+                else 
                 {
-                    the_status = status::OPEN_KEY;
-                    continue;
+                    quotation_marked = false;
+                    key_aux.push_back(in[a]);
                 }
-                continue;
+
+                the_status = status::OPEN_KEY;
             }
             
             else if (the_status == status::OPEN_KEY)
@@ -90,17 +89,25 @@
 
                 //if already reading key
                 //if " are detected and are not part of the string itself
-                if (in[a] == '\"' and in[a-1] != '\\')
+                if (in[a] == '\\') 
+                {
+                    backslashed = true;
+                    continue;
+                }
+
+                if (not quotation_marked and in[a+1] == ':' and in[a] != '\\')
+                {
+                    the_status = status::EXPECT_COLON;
+                }
+                else if (in[a] == '\"' and in[a-1] != '\\')
                 {
                     the_status = status::EXPECT_COLON;
                     continue;
                 }
-                else 
-                {
-                    
-                    key_aux.push_back(in[a]);
-                }
-                continue;
+
+                //we are going to assume that after deescaping we are setting
+                //backslashed to false.
+                if (not backslashed and in[a] > ' ') key_aux.push_back(in[a]);
             }
 
             else if (the_status == status::EXPECT_COLON)
@@ -109,10 +116,8 @@
                 {
                     if (in[a+1] >= '0' and in[a+1] <= '9') the_status = status::NUMBER;
                     else the_status = status::EXPECT_VAL;
-                    continue;
                 }
                 //else throw std::runtime_error("No semicolon found bruh");
-                continue;
             }
 
             else if (the_status == status::EXPECT_VAL)
@@ -120,21 +125,36 @@
                 if (in[a] == '\"') the_status = status::STRING;
                 else if (in[a] == 'T') the_status = status::BOOL;
                 else if (in[a+1] >= '0' and in[a+1] <= '9') the_status = status::NUMBER;
-
-                continue;
             }
 
             else if (the_status == status::STRING)
             {
-                if (in[a] == '\"' and in[a-1] != '\\')
+                if (in[a] == '\"' and not backslashed)
                 {
                     the_status = status::EXPECT_ACTION;
                     add_entry(key_aux, value_aux);
                 }
-                else value_aux.push_back(in[a]);
-
-
-                continue;
+                else 
+                {
+                    if (not backslashed and in[a] == '\\') backslashed = true;
+                    else
+                    {
+                        if (backslashed)
+                        {
+                            switch (in[a])
+                            {
+                                case 'n':
+                                    value_aux.push_back('\n');
+                                    break;
+                                case 't':
+                                    value_aux.push_back('\t');
+                                    break;
+                            }
+                            backslashed = 0;
+                        }
+                        else value_aux.push_back(in[a]);
+                    }
+                }
             }
 
             else if (the_status == status::NUMBER)
@@ -161,9 +181,8 @@
                     the_status = status::EXPECT_KEY;
                     key_aux.clear();
                     value_aux.clear();
-                    continue;
                 }
-                else throw std::runtime_error("no end bracket found");
+                //else throw std::runtime_error("no end bracket found");
             }
 
         }
